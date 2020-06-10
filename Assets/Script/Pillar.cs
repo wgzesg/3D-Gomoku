@@ -7,12 +7,12 @@ public class Pillar : MonoBehaviour
     public GameObject BlackpiecePrefab;
     public GameObject WhitepiecePrefab;
 
-    float piecesCount;
+    int piecesCount;
 
     GameflowManager gameFlowManager;
     PillarManager pillarManager;
 
-    private UnityAction<Vector3> makeMoveEvent;
+    private UnityAction<Vector3Int> makeMoveEvent;
     private int xCood, yCood;
     
 
@@ -43,16 +43,14 @@ public class Pillar : MonoBehaviour
         if(piecesCount < 4)
         {
             Debug.Log("A move on Pillar " + xCood + ", " + yCood + ".");
-            if (gameFlowManager.current_player)
-                Instantiate(BlackpiecePrefab, new Vector3(transform.position.x, 10 * piecesCount, transform.position.z), Quaternion.identity);
-            else
-                Instantiate(WhitepiecePrefab, new Vector3(transform.position.x, 10 * piecesCount, transform.position.z), Quaternion.identity);
+            piecesCount++;
+            Instantiate(gameFlowManager.current_player? BlackpiecePrefab: WhitepiecePrefab, new Vector3(transform.position.x, 10 * piecesCount, transform.position.z), Quaternion.identity);
+
             if (makeMoveEvent != null)
             {
-                Vector3 newmovelocation = new Vector3(xCood, yCood, piecesCount);
+                Vector3Int newmovelocation = new Vector3Int(xCood, yCood, piecesCount - 1);
                 makeMoveEvent(newmovelocation);
             }
-            piecesCount++;
         }
         else
         {
