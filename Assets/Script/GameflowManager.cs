@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class GameflowManager : MonoBehaviour
 {
@@ -31,17 +32,22 @@ public class GameflowManager : MonoBehaviour
         if (current_player)
         {
             chessboard[newMoveLocation.x, newMoveLocation.y, newMoveLocation.z] = 1;
-            Debug.Log("A black is placed at " + newMoveLocation.x + newMoveLocation.y + newMoveLocation.z);
-            //checkWin(newMoveLocation, 1);
+            if(checkWin(newMoveLocation, 1))
+            {
+                SceneManager.LoadScene(sceneName: "BlackWin");
+                Debug.Log("Black wins");
+            }
         }
         else
         {
             chessboard[newMoveLocation.x, newMoveLocation.y, newMoveLocation.z] = -1;
-            Debug.Log("A white is placed.");
-            //checkWin(newMoveLocation, -1);
+            if (checkWin(newMoveLocation, 1))
+            {
+                SceneManager.LoadScene(sceneName: "WhiteWin");
+                Debug.Log("White wins");
+            }
         }
         current_player = !current_player;
-        Debug.Log("CurrentPlayer: " + current_player);
         no_of_rounds ++;
     }
 
@@ -54,10 +60,10 @@ public class GameflowManager : MonoBehaviour
         bool isWin = false;
 
         int[,,] cube = new int[3, 3, 3];
-        cube[1,1,1] = 1;
 
         Stack<Vector3Int> nextToCheck = new Stack<Vector3Int>();
 
+        // Check the 9 cubes around the current move;
         for(int i = -1; i < 2; i++)
         {
             for (int j = -1; j < 2; j++)
@@ -65,32 +71,31 @@ public class GameflowManager : MonoBehaviour
                 for (int k = -1; k < 2; k++)
                 {
                     Vector3Int CurrentMove = newmove + new Vector3Int(i, j, k);
-                    if (i + j + k != 0 && chessboard[CurrentMove.x, CurrentMove.y, CurrentMove.z] == current)
+
+                    bool moveStatus = Validmove(CurrentMove, newmove);
+                    if (moveStatus && chessboard[CurrentMove.x, CurrentMove.y, CurrentMove.z] == current)
                     {
                         nextToCheck.Push(CurrentMove);
-                        cube[i, j, k]++;
+                        cube[i+ 1, j+ 1, k+1]++;
                     }
-                    else if(i + j + k != 0)
+                    else if(moveStatus)
                     {
-                        cube[i, j, k] = 0;
+                        cube[i + 1, j + 1, k + 1] = 0;
                     }
                 }
             }
         }
 
-        while(nextToCheck != null)
+        while (nextToCheck.Count != 0)
         {
             Vector3Int CurrentMove = nextToCheck.Pop();
             Vector3Int dir = new Vector3Int(Mathf.Clamp(CurrentMove.x - newmove.x, -1, 1), Mathf.Clamp(CurrentMove.y - newmove.y, -1, 1), Mathf.Clamp(CurrentMove.z - newmove.z, -1, 1));
-            if (chessboard[CurrentMove.x, CurrentMove.y, CurrentMove.z] == current)
+            CurrentMove += dir;
+            if (Validmove(CurrentMove, new Vector3Int(-1, -1, -1)) && chessboard[CurrentMove.x, CurrentMove.y, CurrentMove.z] == current)
             {
-                cube[dir.x, dir.y, dir.z]++;
-                dir += CurrentMove;
-                if (dir.x < 4 && dir.y < 4 && dir.z < 4 && dir.x > 0 && dir.y > 0 && dir.z > 0)
-                    nextToCheck.Push(dir);
+                cube[dir.x + 1, dir.y + 1, dir.z + 1]++;
+                nextToCheck.Push(CurrentMove);
             }
-            else
-                cube[dir.x, dir.y, dir.z] = 0;
         }
 
         for (int i = 0; i < 2; i++)
@@ -99,7 +104,7 @@ public class GameflowManager : MonoBehaviour
             {
                 for (int k = 0; k < 2; k++)
                 {
-                    if (cube[i,j,k] + cube[2-i,2-j,2-k] == 3)
+                    if (cube[i, j, k] + cube[2 - i, 2 - j, 2 - k] == 3)
                     {
                         isWin = true;
                     }
@@ -107,8 +112,20 @@ public class GameflowManager : MonoBehaviour
             }
         }
 
+        Debug.Log("status is " + isWin);
         return isWin;
+    }
 
-
+    bool Validmove(Vector3Int CurrentMove, Vector3Int newmove)
+    {
+        if (CurrentMove == newmove)
+        {
+            return false;
+        }
+        if (CurrentMove.x < 0 || CurrentMove.y < 0 || CurrentMove.z < 0)
+            return false;
+        if (CurrentMove.x > 3 || CurrentMove.y > 3 || CurrentMove.z > 3)
+            return false;
+        return true;
     }
 }
