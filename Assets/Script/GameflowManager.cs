@@ -1,12 +1,14 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
 public class GameflowManager : MonoBehaviour
 {
     int no_of_rounds;
     public bool current_player;
+    public TMPro.TextMeshProUGUI Winmessage;
+
     private int[,,] chessboard = new int[4,4,4];
 
     // Start is called before the first frame update
@@ -24,6 +26,7 @@ public class GameflowManager : MonoBehaviour
                 }
             }
         }
+        Winmessage.text = null;
     }
 
     // Update is called once per frame
@@ -34,17 +37,15 @@ public class GameflowManager : MonoBehaviour
             chessboard[newMoveLocation.x, newMoveLocation.y, newMoveLocation.z] = 1;
             if(checkWin(newMoveLocation, 1))
             {
-                SceneManager.LoadScene(sceneName: "BlackWin");
-                Debug.Log("Black wins");
+                Winmessage.text = "Black wins";
             }
         }
         else
         {
             chessboard[newMoveLocation.x, newMoveLocation.y, newMoveLocation.z] = -1;
-            if (checkWin(newMoveLocation, 1))
+            if (checkWin(newMoveLocation, -1))
             {
-                SceneManager.LoadScene(sceneName: "WhiteWin");
-                Debug.Log("White wins");
+                Winmessage.text = "White wins";
             }
         }
         current_player = !current_player;
@@ -63,7 +64,7 @@ public class GameflowManager : MonoBehaviour
 
         Stack<Vector3Int> nextToCheck = new Stack<Vector3Int>();
 
-        // Check the 9 cubes around the current move;
+        // Check the 3*3*3 cubes around the current move;
         for(int i = -1; i < 2; i++)
         {
             for (int j = -1; j < 2; j++)
@@ -78,10 +79,6 @@ public class GameflowManager : MonoBehaviour
                         nextToCheck.Push(CurrentMove);
                         cube[i+ 1, j+ 1, k+1]++;
                     }
-                    else if(moveStatus)
-                    {
-                        cube[i + 1, j + 1, k + 1] = 0;
-                    }
                 }
             }
         }
@@ -91,18 +88,18 @@ public class GameflowManager : MonoBehaviour
             Vector3Int CurrentMove = nextToCheck.Pop();
             Vector3Int dir = new Vector3Int(Mathf.Clamp(CurrentMove.x - newmove.x, -1, 1), Mathf.Clamp(CurrentMove.y - newmove.y, -1, 1), Mathf.Clamp(CurrentMove.z - newmove.z, -1, 1));
             CurrentMove += dir;
-            if (Validmove(CurrentMove, new Vector3Int(-1, -1, -1)) && chessboard[CurrentMove.x, CurrentMove.y, CurrentMove.z] == current)
+            if (Validmove(CurrentMove, newmove) && chessboard[CurrentMove.x, CurrentMove.y, CurrentMove.z] == current)
             {
                 cube[dir.x + 1, dir.y + 1, dir.z + 1]++;
                 nextToCheck.Push(CurrentMove);
             }
         }
 
-        for (int i = 0; i < 2; i++)
+        for (int i = 0; i < 3; i++)
         {
-            for (int j = 0; j < 2; j++)
+            for (int j = 0; j < 3; j++)
             {
-                for (int k = 0; k < 2; k++)
+                for (int k = 0; k < 3; k++)
                 {
                     if (cube[i, j, k] + cube[2 - i, 2 - j, 2 - k] == 3)
                     {
@@ -128,4 +125,5 @@ public class GameflowManager : MonoBehaviour
             return false;
         return true;
     }
+
 }

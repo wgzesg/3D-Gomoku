@@ -15,11 +15,22 @@ public class CameraController : MonoBehaviour
 	private bool isPanning;     // Is the camera being panned?
 	private bool isRotating;    // Is the camera being rotated?
 
-	//
-	// UPDATE
-	//
 
-	void Update()
+	private Vector3 startingPos;
+	private Quaternion startingRot;
+
+    //
+    // UPDATE
+    //
+
+    private void Start()
+    {
+		startingPos = transform.position;
+		startingRot = transform.localRotation;
+
+	}
+
+    void Update()
 	{
 
 		// Get the middle mouse button
@@ -64,5 +75,12 @@ public class CameraController : MonoBehaviour
 		Vector3 position = Camera.main.ScreenToViewportPoint(Input.mousePosition - mouseOrigin);
 		Vector3 Updatemove = position.y * ScrollWheelChange * zoomSpeed * transform.forward;
 		transform.Translate(Updatemove, Space.World);
+	}
+
+
+	public void OnResetCam()
+    {
+		transform.position = startingPos;
+		transform.localRotation = startingRot;
 	}
 }
