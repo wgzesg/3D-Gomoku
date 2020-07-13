@@ -3,6 +3,7 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.IO;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
 {
@@ -186,4 +187,20 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
         RoomPage.SetActive(false);
     }
     #endregion
+
+    public void returnFromGameRoom()
+    {
+        FrontPage.SetActive(false);
+        LobbyPage.SetActive(false);
+        RoomPage.SetActive(false);
+
+        if(PhotonNetwork.NetworkClientState == ClientState.JoinedLobby)
+        {
+            LobbyPage.SetActive(true);
+        }
+        else
+        {
+            FrontPage.SetActive(true);
+        }
+    }
 }

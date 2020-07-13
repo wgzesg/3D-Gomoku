@@ -33,9 +33,18 @@ public class InGameMenu : MonoBehaviour
         PhotonNetwork.LeaveRoom();
         if (PhotonNetwork.IsMasterClient)
         {
+            SceneManager.sceneLoaded += onSceneFinishedLoading;
             PhotonNetwork.LoadLevel(startSceneIndex);
         }
     }
+
+    public void onSceneFinishedLoading(Scene scene, LoadSceneMode mode)
+    {
+        PhotonLobby theLobby = FindObjectOfType<PhotonLobby>();
+        theLobby.returnFromGameRoom();
+    }
+
+
 
     public void OnResetCam()
     {
