@@ -1,22 +1,61 @@
 ﻿using System.Collections.Generic;
+using System.IO;
+using Photon.Pun;
+using Photon.Realtime;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
+using UnityEngine.Events;
 
 public class GameflowManager : MonoBehaviour
 {
+    public static GameflowManager GFM;
+
     int no_of_rounds;
-    public bool current_player;
+    public int current_playerIndex;
     public TMPro.TextMeshProUGUI Winmessage;
 
     private int[,,] chessboard = new int[4,4,4];
 
+    private Player[] playerList;
+    public Player current_player;
+
+    public UnityAction OnNewTurn;
+    private bool GameEnded;
+    public UnityAction OnGameEnded;
+
+    public Player winner;
+
+
+    // Singleton structure
+    private void Awake()
+    {
+        if (GFM == null)
+        {
+            GFM = this;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else
+        {
+            if(GFM != null)
+            {
+                Destroy(GFM.gameObject);
+            }
+        }
+    }
+
+
     // Start is called before the first frame update
     void Start()
     {
+        GameEnded = false;
+        playerList = PhotonNetwork.PlayerList;
+
+        PillarManager.PM.makeMoveEvent += OnMakeMove;
+
         no_of_rounds = 0;
-        current_player = true;
-        for(int x = 0; x < 4; x++)
+        current_playerIndex = 1;
+        current_player = playerList[current_playerIndex];
+
+        for (int x = 0; x < 4; x++)
         {
             for(int y = 0; y < 4; y++)
             {
@@ -26,18 +65,37 @@ public class GameflowManager : MonoBehaviour
                 }
             }
         }
-        Winmessage.text = null;
+        Winmessage.gameObject.SetActive(false);
+
+        if(OnNewTurn != null)
+        {
+            OnNewTurn.Invoke();
+        }
     }
 
-    // Update is called once per frame
+
+    public void SwitchPlayer()
+    {
+        Debug.Log("Switching player");
+        current_playerIndex = 1 - current_playerIndex;
+        current_player = playerList[current_playerIndex];
+
+        if (OnNewTurn != null)
+        {
+            OnNewTurn.Invoke();
+        }
+
+    }
+
     public void OnMakeMove(Vector3Int newMoveLocation)
     {
-        if (current_player)
+        Debug.Log("made move callback");
+        if (current_playerIndex == 0)
         {
             chessboard[newMoveLocation.x, newMoveLocation.y, newMoveLocation.z] = 1;
             if(checkWin(newMoveLocation, 1))
             {
-                Winmessage.text = "Black wins";
+                winHandler(current_player);
             }
         }
         else
@@ -45,13 +103,36 @@ public class GameflowManager : MonoBehaviour
             chessboard[newMoveLocation.x, newMoveLocation.y, newMoveLocation.z] = -1;
             if (checkWin(newMoveLocation, -1))
             {
-                Winmessage.text = "White wins";
+                winHandler(current_player);
             }
         }
-        current_player = !current_player;
+        if (GameEnded)
+            return;
+        SwitchPlayer();
         no_of_rounds ++;
     }
 
+    public void winHandler(Player winner)
+    {
+        Winmessage.gameObject.SetActive(true);
+        if (winner == PhotonNetwork.LocalPlayer)
+        {
+            Winmessage.text = "You win";
+        }
+        else
+        {
+            Winmessage.text = "You lose";
+        }
+        GameEnded = true;
+
+        if(OnGameEnded != null)
+        {
+            OnGameEnded.Invoke();
+        }
+
+    }
+
+    #region check win logic
     bool checkWin(Vector3Int newmove, int current)
     {
         int x = newmove.x;
@@ -125,5 +206,5 @@ public class GameflowManager : MonoBehaviour
             return false;
         return true;
     }
-
+    #endregion
 }

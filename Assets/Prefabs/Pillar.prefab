@@ -27,9 +27,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5031437013419755483}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.125, y: 0, z: 0.125}
-  m_LocalScale: {x: 0.05, y: 100, z: 0.05}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 6, y: 25, z: 6}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -98,6 +98,8 @@ MonoBehaviour:
     type: 3}
   WhitepiecePrefab: {fileID: 3519581113832349294, guid: 40e0ff7aa6edc4b51a2db29874769526,
     type: 3}
+  xCood: 0
+  yCood: 0
 --- !u!136 &2512583073193013786
 CapsuleCollider:
   m_ObjectHideFlags: 0
