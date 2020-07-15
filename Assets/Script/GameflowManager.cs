@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using Photon.Pun;
 using Photon.Realtime;
 using UnityEngine;
@@ -12,6 +11,7 @@ public class GameflowManager : MonoBehaviour
     int no_of_rounds;
     public int current_playerIndex;
     public TMPro.TextMeshProUGUI Winmessage;
+    public PhotonView PV;
 
     private int[,,] chessboard = new int[4,4,4];
 
@@ -19,7 +19,8 @@ public class GameflowManager : MonoBehaviour
     public Player current_player;
 
     public UnityAction OnNewTurn;
-    private bool GameEnded;
+    public bool GameStarted;
+    public bool GameEnded;
     public UnityAction OnGameEnded;
 
     public Player winner;
@@ -28,6 +29,8 @@ public class GameflowManager : MonoBehaviour
     // Singleton structure
     private void Awake()
     {
+        GameStarted = false;
+        GameEnded = false;
         if (GFM == null)
         {
             GFM = this;
@@ -40,13 +43,14 @@ public class GameflowManager : MonoBehaviour
                 Destroy(GFM.gameObject);
             }
         }
+
+        PV = GetComponent<PhotonView>();
     }
 
 
     // Start is called before the first frame update
     void Start()
     {
-        GameEnded = false;
         playerList = PhotonNetwork.PlayerList;
 
         PillarManager.PM.makeMoveEvent += OnMakeMove;
@@ -66,8 +70,9 @@ public class GameflowManager : MonoBehaviour
             }
         }
         Winmessage.gameObject.SetActive(false);
+        GameStarted = true;
 
-        if(OnNewTurn != null)
+        if (OnNewTurn != null)
         {
             OnNewTurn.Invoke();
         }
@@ -112,6 +117,7 @@ public class GameflowManager : MonoBehaviour
         no_of_rounds ++;
     }
 
+    [PunRPC]
     public void winHandler(Player winner)
     {
         Winmessage.gameObject.SetActive(true);
@@ -129,7 +135,6 @@ public class GameflowManager : MonoBehaviour
         {
             OnGameEnded.Invoke();
         }
-
     }
 
     #region check win logic

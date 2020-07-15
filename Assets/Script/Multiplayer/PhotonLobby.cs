@@ -3,13 +3,13 @@ using Photon.Pun;
 using Photon.Realtime;
 using System.IO;
 using System.Collections;
-using UnityEngine.SceneManagement;
 
 public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
 {
 
     public GameObject offlineKey;
     public GameObject onlineKey;
+    public GameObject startKey;
 
     public GameObject FrontPage;
     public GameObject LobbyPage;
@@ -19,7 +19,6 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
     public Room room;
     public TMPro.TextMeshProUGUI roomName;
     public RoomInfo thisRoomInfo;
-    public GameObject startKey;
 
     public GameObject ExitRoomPanel;
     public GameObject JoinRoomPanel;
@@ -36,7 +35,6 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
         offlineKey.SetActive(false);
         onlineKey.SetActive(true);
     }
-
 
     #region FrontPage functions
 
@@ -102,7 +100,6 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
         room = PhotonNetwork.CurrentRoom;
         PhotonNetwork.AutomaticallySyncScene = true;
         roomName.text = "Room " + room.Name;
-
         PhotonNetwork.Instantiate(Path.Combine("MultiplayerPrefabs", "NetPlayer"), transform.position, Quaternion.identity);
     }
 
@@ -114,7 +111,8 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
         {
             IsOpen = true,
             IsVisible = true,
-            MaxPlayers = 2
+            MaxPlayers = 2,
+            EmptyRoomTtl = 0
         };
         return PhotonNetwork.CreateRoom(roomName, roomOps);
     }
@@ -137,6 +135,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
     public override void OnLeftRoom()
     {
         base.OnLeftRoom();
+        Debug.Log("Onleftroom in roomManager is called");
         StartCoroutine(RejoinCoroutine());
     }
 
@@ -179,7 +178,7 @@ public class PhotonLobby : MonoBehaviourPunCallbacks, IInRoomCallbacks
     IEnumerator RejoinCoroutine()
     {
         ExitRoomPanel.SetActive(true);
-        while(PhotonNetwork.Server != ServerConnection.MasterServer || PhotonNetwork.NetworkClientState != ClientState.ConnectedToMasterServer)
+        while (PhotonNetwork.Server != ServerConnection.MasterServer || PhotonNetwork.NetworkClientState != ClientState.ConnectedToMasterServer)
             yield return null;
         PhotonNetwork.JoinLobby();
         ExitRoomPanel.SetActive(false);

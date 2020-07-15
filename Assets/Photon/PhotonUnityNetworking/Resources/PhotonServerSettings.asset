@@ -39,6 +39,7 @@ MonoBehaviour:
   - Fire
   - RespawnSpaceship
   - MakeMoveOn
+  - winHandler
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

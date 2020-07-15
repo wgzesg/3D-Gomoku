@@ -25,7 +25,7 @@ public class Pillar : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if(piecesCount < 4)
+        if(piecesCount < 4 && !GameflowManager.GFM.GameEnded)
         {
             if (GameflowManager.GFM.current_player == PhotonNetwork.LocalPlayer)
             {
